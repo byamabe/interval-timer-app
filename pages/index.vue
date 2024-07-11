@@ -39,14 +39,6 @@ const addTimer = (timerData) => {
 };
 
 const selectDefaultTimer = (timer) => {
-  selectedTimer.value = {
-    name: timer.name,
-    totalDuration: timer.totalDuration / 60, // Convert to minutes for the form
-    intervals: timer.intervals,
-    intervalThreshold: timer.intervalThreshold,
-    expireThreshold: timer.expireThreshold,
-    intervalColor: timer.intervalColor,
-    expireColor: timer.expireColor
-  };
+  selectedTimer.value = timer;
 };
 </script>

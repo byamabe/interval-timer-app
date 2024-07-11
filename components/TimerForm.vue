@@ -17,7 +17,7 @@
       >
       <input
         id="totalDuration"
-        v-model="totalDuration"
+        v-model.number="totalDuration"
         type="number"
         required
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -25,43 +25,48 @@
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2"
-        >Intervals (seconds):</label
+        >Intervals:</label
       >
-      <div class="space-y-2">
+      <div class="space-y-4">
         <div
           v-for="(interval, index) in intervals"
           :key="index"
-          class="flex items-center"
+          class="p-4 bg-gray-50 rounded-md"
         >
-          <input
-            v-model="intervals[index]"
-            type="number"
-            required
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          <button
-            @click="removeInterval(index)"
-            type="button"
-            class="ml-2 inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <svg
-              class="h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-medium">Interval {{ index + 1 }}</span>
+            <button
+              @click="removeInterval(index)"
+              type="button"
+              class="text-red-600 hover:text-red-800"
             >
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
+              Remove
+            </button>
+          </div>
+          <div class="space-y-2">
+            <input
+              v-model.number="interval.duration"
+              type="number"
+              required
+              placeholder="Duration (seconds)"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+            <input
+              v-model="interval.title"
+              placeholder="Title (optional)"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+            <textarea
+              v-model="interval.description"
+              placeholder="Description (optional)"
+              rows="2"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            ></textarea>
+          </div>
         </div>
       </div>
       <button
-        @click="addInterval"
+        @click.prevent="addInterval"
         type="button"
         class="mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
@@ -76,7 +81,7 @@
       >
       <input
         id="intervalThreshold"
-        v-model="intervalThreshold"
+        v-model.number="intervalThreshold"
         type="number"
         required
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -101,7 +106,7 @@
       >
       <input
         id="expireThreshold"
-        v-model="expireThreshold"
+        v-model.number="expireThreshold"
         type="number"
         required
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -139,11 +144,11 @@ const props = defineProps({
 
 const timerName = ref("");
 const totalDuration = ref(0);
-const intervals = ref([60]);
+const intervals = ref([{ duration: 60, title: "", description: "" }]);
 const intervalThreshold = ref(10);
 const expireThreshold = ref(10);
-const intervalColor = ref("#FFFF00"); // Yellow
-const expireColor = ref("#FF0000"); // Red
+const intervalColor = ref("#FFFF00");
+const expireColor = ref("#FF0000");
 
 const emit = defineEmits(["create-timer"]);
 
@@ -152,8 +157,12 @@ watch(
   (newValue) => {
     if (newValue) {
       timerName.value = newValue.name;
-      totalDuration.value = newValue.totalDuration;
-      intervals.value = [...newValue.intervals];
+      totalDuration.value = newValue.totalDuration / 60; // Convert to minutes
+      intervals.value = newValue.intervals.map((interval) => ({
+        duration: interval.duration,
+        title: interval.title || "",
+        description: interval.description || ""
+      }));
       intervalThreshold.value = newValue.intervalThreshold || 10;
       expireThreshold.value = newValue.expireThreshold || 10;
       intervalColor.value = newValue.intervalColor || "#FFFF00";
@@ -164,7 +173,7 @@ watch(
 );
 
 const addInterval = () => {
-  intervals.value.push(60);
+  intervals.value.push({ duration: 60, title: "", description: "" });
 };
 
 const removeInterval = (index) => {
@@ -174,10 +183,10 @@ const removeInterval = (index) => {
 const createTimer = () => {
   emit("create-timer", {
     name: timerName.value,
-    totalDuration: parseInt(totalDuration.value) * 60, // Convert to seconds
-    intervals: intervals.value.map((interval) => parseInt(interval)),
-    intervalThreshold: parseInt(intervalThreshold.value),
-    expireThreshold: parseInt(expireThreshold.value),
+    totalDuration: totalDuration.value * 60, // Convert to seconds
+    intervals: intervals.value,
+    intervalThreshold: intervalThreshold.value,
+    expireThreshold: expireThreshold.value,
     intervalColor: intervalColor.value,
     expireColor: expireColor.value
   });
@@ -187,7 +196,7 @@ const createTimer = () => {
 const resetForm = () => {
   timerName.value = "";
   totalDuration.value = 0;
-  intervals.value = [60];
+  intervals.value = [{ duration: 60, title: "", description: "" }];
   intervalThreshold.value = 10;
   expireThreshold.value = 10;
   intervalColor.value = "#FFFF00";

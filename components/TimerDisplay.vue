@@ -24,6 +24,20 @@
         {{ formatTime(intervalTimeRemaining) }}
       </p>
     </div>
+    <div
+      v-if="currentIntervalData.title || currentIntervalData.description"
+      class="mb-4 p-4 bg-white bg-opacity-50 rounded-md"
+    >
+      <h3
+        v-if="currentIntervalData.title"
+        class="text-lg font-semibold text-gray-900 mb-2"
+      >
+        {{ currentIntervalData.title }}
+      </h3>
+      <p v-if="currentIntervalData.description" class="text-gray-700">
+        {{ currentIntervalData.description }}
+      </p>
+    </div>
     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
       <button
         @click="toggleTimer"
@@ -54,7 +68,7 @@ const props = defineProps({
 const isRunning = ref(false);
 const timeRemaining = ref(props.timer.totalDuration);
 const currentInterval = ref(0);
-const intervalTimeRemaining = ref(props.timer.intervals[0]);
+const intervalTimeRemaining = ref(props.timer.intervals[0].duration);
 
 const backgroundColor = computed(() => {
   if (timeRemaining.value <= props.timer.expireThreshold) {
@@ -64,6 +78,10 @@ const backgroundColor = computed(() => {
   } else {
     return "white";
   }
+});
+
+const currentIntervalData = computed(() => {
+  return props.timer.intervals[currentInterval.value];
 });
 
 let intervalId = null;
@@ -99,15 +117,15 @@ const playTone = (frequency, duration) => {
 
 const playIntervalTone = async () => {
   for (let i = 0; i < 3; i++) {
-    await playTone(440, 0.2); // 440 Hz - A4 note, for 0.2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 200)); // 200ms pause between tones
+    await playTone(440, 0.2);
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 };
 
 const playEndTone = async () => {
   for (let i = 0; i < 5; i++) {
-    await playTone(587.33, 0.3); // 587.33 Hz - D5 note, for 0.3 seconds
-    await new Promise((resolve) => setTimeout(resolve, 200)); // 200ms pause between tones
+    await playTone(587.33, 0.3);
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 };
 
@@ -121,18 +139,18 @@ const toggleTimer = () => {
         intervalTimeRemaining.value--;
         if (intervalTimeRemaining.value === 0) {
           if (currentInterval.value < props.timer.intervals.length - 1) {
-            await playIntervalTone(); // Play interval tone 3 times
+            await playIntervalTone();
             currentInterval.value++;
             intervalTimeRemaining.value =
-              props.timer.intervals[currentInterval.value];
+              props.timer.intervals[currentInterval.value].duration;
           } else {
-            await playEndTone(); // Play end tone 5 times
+            await playEndTone();
             clearInterval(intervalId);
             isRunning.value = false;
           }
         }
       } else {
-        await playEndTone(); // Play end tone 5 times
+        await playEndTone();
         clearInterval(intervalId);
         isRunning.value = false;
       }
@@ -146,7 +164,7 @@ const resetTimer = () => {
   isRunning.value = false;
   timeRemaining.value = props.timer.totalDuration;
   currentInterval.value = 0;
-  intervalTimeRemaining.value = props.timer.intervals[0];
+  intervalTimeRemaining.value = props.timer.intervals[0].duration;
 };
 
 const formatTime = (seconds) => {

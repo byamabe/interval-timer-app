@@ -1,14 +1,22 @@
 <template>
-  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Interval Timer App</h1>
-    <DefaultTimers @select-timer="selectDefaultTimer" />
-    <TimerForm
-      @create-timer="addTimer"
-      :initialTimer="selectedTimer"
-      class="mb-8"
-    />
-    <div class="space-y-6">
-      <TimerDisplay v-for="timer in timers" :key="timer.id" :timer="timer" />
+  <div
+    class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12"
+  >
+    <div
+      class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-4xl mx-auto"
+    >
+      <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        Interval Timer App
+      </h1>
+      <DefaultTimers @select-timer="selectDefaultTimer" />
+      <TimerForm
+        @create-timer="addTimer"
+        :initialTimer="selectedTimer"
+        class="mb-8"
+      />
+      <div class="space-y-6">
+        <TimerDisplay v-for="timer in timers" :key="timer.id" :timer="timer" />
+      </div>
     </div>
   </div>
 </template>
@@ -34,7 +42,11 @@ const selectDefaultTimer = (timer) => {
   selectedTimer.value = {
     name: timer.name,
     totalDuration: timer.totalDuration / 60, // Convert to minutes for the form
-    intervals: timer.intervals
+    intervals: timer.intervals,
+    intervalThreshold: timer.intervalThreshold,
+    expireThreshold: timer.expireThreshold,
+    intervalColor: timer.intervalColor,
+    expireColor: timer.expireColor
   };
 };
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div class="mb-8">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Default Timers</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <button
         v-for="(timer, index) in defaultTimers"
         :key="index"
         @click="selectTimer(timer)"
-        class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-150"
+        class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-150 text-left"
       >
         <h3 class="font-medium text-gray-900">{{ timer.name }}</h3>
         <p class="text-sm text-gray-500">

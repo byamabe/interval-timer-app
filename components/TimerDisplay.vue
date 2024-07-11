@@ -1,28 +1,39 @@
 <template>
   <div
-    class="p-4 my-4 rounded-lg transition-colors duration-300"
+    class="p-6 my-4 rounded-lg shadow-md transition-colors duration-300"
     :style="{ backgroundColor: backgroundColor }"
   >
-    <h2 class="text-2xl font-bold text-gray-900">{{ timer.name }}</h2>
-    <p class="mt-2 text-lg text-gray-600">
-      Time Remaining: {{ formatTime(timeRemaining) }}
-    </p>
-    <p class="mt-1 text-sm text-gray-500">
-      Current Interval: {{ currentInterval + 1 }} / {{ timer.intervals.length }}
-    </p>
-    <p class="mt-1 text-sm text-gray-500">
-      Interval Time: {{ formatTime(intervalTimeRemaining) }}
-    </p>
-    <div class="mt-4 space-x-2">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ timer.name }}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Time Remaining:</p>
+        <p class="text-3xl font-bold text-gray-900">
+          {{ formatTime(timeRemaining) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-500">Current Interval:</p>
+        <p class="text-3xl font-bold text-gray-900">
+          {{ currentInterval + 1 }} / {{ timer.intervals.length }}
+        </p>
+      </div>
+    </div>
+    <div class="mb-4">
+      <p class="text-sm font-medium text-gray-500">Interval Time:</p>
+      <p class="text-2xl font-bold text-gray-900">
+        {{ formatTime(intervalTimeRemaining) }}
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
       <button
         @click="toggleTimer"
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
         {{ isRunning ? "Pause" : "Start" }}
       </button>
       <button
         @click="resetTimer"
-        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        class="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
         Reset
       </button>

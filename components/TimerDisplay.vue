@@ -122,15 +122,41 @@ onMounted(() => {
 });
 
 const playTone = (frequency, duration) => {
-  // ... (playTone function remains the same)
+  return new Promise((resolve) => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+    gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.001,
+      audioContext.currentTime + duration
+    );
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration);
+
+    setTimeout(resolve, duration * 1000);
+  });
 };
 
 const playIntervalTone = async () => {
-  // ... (playIntervalTone function remains the same)
+  for (let i = 0; i < 3; i++) {
+    await playTone(440, 0.2);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 };
 
 const playEndTone = async () => {
-  // ... (playEndTone function remains the same)
+  for (let i = 0; i < 5; i++) {
+    await playTone(587.33, 0.3);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 };
 
 const toggleTimer = () => {

@@ -12,16 +12,26 @@
       />
     </div>
     <div>
-      <label for="totalDuration" class="block text-sm font-medium text-gray-700"
-        >Total Duration (minutes):</label
+      <label class="block text-sm font-medium text-gray-700"
+        >Total Duration:</label
       >
-      <input
-        id="totalDuration"
-        v-model.number="totalDuration"
-        type="number"
-        required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-      />
+      <div class="mt-1 flex rounded-md shadow-sm">
+        <input
+          v-model.number="totalMinutes"
+          type="number"
+          min="0"
+          class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Minutes"
+        />
+        <input
+          v-model.number="totalSeconds"
+          type="number"
+          min="0"
+          max="59"
+          class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Seconds"
+        />
+      </div>
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -44,13 +54,23 @@
             </button>
           </div>
           <div class="space-y-2">
-            <input
-              v-model.number="interval.duration"
-              type="number"
-              required
-              placeholder="Duration (seconds)"
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
+            <div class="flex rounded-md shadow-sm">
+              <input
+                v-model.number="interval.minutes"
+                type="number"
+                min="0"
+                class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Minutes"
+              />
+              <input
+                v-model.number="interval.seconds"
+                type="number"
+                min="0"
+                max="59"
+                class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Seconds"
+              />
+            </div>
             <input
               v-model="interval.title"
               placeholder="Title (optional)"
@@ -133,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 
 const props = defineProps({
   initialTimer: {
@@ -143,8 +163,9 @@ const props = defineProps({
 });
 
 const timerName = ref("");
-const totalDuration = ref(0);
-const intervals = ref([{ duration: 60, title: "", description: "" }]);
+const totalMinutes = ref(0);
+const totalSeconds = ref(0);
+const intervals = ref([]);
 const intervalThreshold = ref(10);
 const expireThreshold = ref(10);
 const intervalColor = ref("#FFFF00");
@@ -152,14 +173,28 @@ const expireColor = ref("#FF0000");
 
 const emit = defineEmits(["create-timer"]);
 
+const totalDuration = computed(() => {
+  return totalMinutes.value * 60 + totalSeconds.value;
+});
+
+const remainingTime = computed(() => {
+  const usedTime = intervals.value.reduce(
+    (total, interval) => total + interval.minutes * 60 + interval.seconds,
+    0
+  );
+  return Math.max(0, totalDuration.value - usedTime);
+});
+
 watch(
   () => props.initialTimer,
   (newValue) => {
     if (newValue) {
       timerName.value = newValue.name;
-      totalDuration.value = newValue.totalDuration / 60; // Convert to minutes
+      totalMinutes.value = Math.floor(newValue.totalDuration / 60);
+      totalSeconds.value = newValue.totalDuration % 60;
       intervals.value = newValue.intervals.map((interval) => ({
-        duration: interval.duration,
+        minutes: Math.floor(interval.duration / 60),
+        seconds: interval.duration % 60,
         title: interval.title || "",
         description: interval.description || ""
       }));
@@ -173,7 +208,14 @@ watch(
 );
 
 const addInterval = () => {
-  intervals.value.push({ duration: 60, title: "", description: "" });
+  const defaultMinutes = Math.floor(remainingTime.value / 60);
+  const defaultSeconds = remainingTime.value % 60;
+  intervals.value.push({
+    minutes: defaultMinutes,
+    seconds: defaultSeconds,
+    title: "",
+    description: ""
+  });
 };
 
 const removeInterval = (index) => {
@@ -183,8 +225,12 @@ const removeInterval = (index) => {
 const createTimer = () => {
   emit("create-timer", {
     name: timerName.value,
-    totalDuration: totalDuration.value * 60, // Convert to seconds
-    intervals: intervals.value,
+    totalDuration: totalDuration.value,
+    intervals: intervals.value.map((interval) => ({
+      duration: interval.minutes * 60 + interval.seconds,
+      title: interval.title,
+      description: interval.description
+    })),
     intervalThreshold: intervalThreshold.value,
     expireThreshold: expireThreshold.value,
     intervalColor: intervalColor.value,
@@ -195,8 +241,9 @@ const createTimer = () => {
 
 const resetForm = () => {
   timerName.value = "";
-  totalDuration.value = 0;
-  intervals.value = [{ duration: 60, title: "", description: "" }];
+  totalMinutes.value = 0;
+  totalSeconds.value = 0;
+  intervals.value = [];
   intervalThreshold.value = 10;
   expireThreshold.value = 10;
   intervalColor.value = "#FFFF00";

@@ -29,33 +29,39 @@ const defaultTimers = [
     totalDuration: 3 * 60,
     intervals: [
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Left to Right",
         description: "Look from left to right"
       },
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Up and Down",
         description: "Look up then down with hands on chest"
       },
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Tilt ears up from side to side",
         description:
           "Tilt ears up from side to side with hands on chest. Don't bring ears down."
       },
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Neck forward and back",
         description: "Move neck forward then back with hands on chest"
       },
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Eyes level move head side to side",
         description: "Move head side to side with eyes level like Janet Jackson"
       },
       {
-        duration: 30,
+        minutes: 0,
+        seconds: 30,
         title: "Head half circles",
         description: "Tilt ear up then roll chin to chest"
       }
@@ -70,7 +76,7 @@ const defaultTimers = [
     totalDuration: 10 * 60,
     intervals: Array(20)
       .fill()
-      .map(() => ({ duration: 30, title: "", description: "" })),
+      .map(() => ({ minutes: 0, seconds: 30, title: "", description: "" })),
     intervalThreshold: 10,
     expireThreshold: 10,
     intervalColor: "#FFFF00",
@@ -82,7 +88,7 @@ const defaultTimers = [
     intervals: Array(10)
       .fill()
       .flatMap(() => [
-        { duration: 60, title: "", description: "" },
+        { minutes: 1, seconds: 0, title: "", description: "" },
         { duration: 30, title: "", description: "" }
       ]),
     intervalThreshold: 10,

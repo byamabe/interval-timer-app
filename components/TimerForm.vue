@@ -54,23 +54,13 @@
             </button>
           </div>
           <div class="space-y-2">
-            <div class="flex rounded-md shadow-sm">
-              <input
-                v-model.number="interval.minutes"
-                type="number"
-                min="0"
-                class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Minutes"
-              />
-              <input
-                v-model.number="interval.seconds"
-                type="number"
-                min="0"
-                max="59"
-                class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Seconds"
-              />
-            </div>
+            <input
+              v-model.number="interval.duration"
+              type="number"
+              required
+              placeholder="Duration (seconds)"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
             <input
               v-model="interval.title"
               placeholder="Title (optional)"
@@ -179,7 +169,7 @@ const totalDuration = computed(() => {
 
 const remainingTime = computed(() => {
   const usedTime = intervals.value.reduce(
-    (total, interval) => total + interval.minutes * 60 + interval.seconds,
+    (total, interval) => total + interval.duration,
     0
   );
   return Math.max(0, totalDuration.value - usedTime);
@@ -192,12 +182,7 @@ watch(
       timerName.value = newValue.name;
       totalMinutes.value = Math.floor(newValue.totalDuration / 60);
       totalSeconds.value = newValue.totalDuration % 60;
-      intervals.value = newValue.intervals.map((interval) => ({
-        minutes: Math.floor(interval.duration / 60),
-        seconds: interval.duration % 60,
-        title: interval.title || "",
-        description: interval.description || ""
-      }));
+      intervals.value = newValue.intervals.map((interval) => ({ ...interval }));
       intervalThreshold.value = newValue.intervalThreshold || 10;
       expireThreshold.value = newValue.expireThreshold || 10;
       intervalColor.value = newValue.intervalColor || "#FFFF00";
@@ -208,11 +193,8 @@ watch(
 );
 
 const addInterval = () => {
-  const defaultMinutes = Math.floor(remainingTime.value / 60);
-  const defaultSeconds = remainingTime.value % 60;
   intervals.value.push({
-    minutes: defaultMinutes,
-    seconds: defaultSeconds,
+    duration: remainingTime.value,
     title: "",
     description: ""
   });
@@ -226,11 +208,7 @@ const createTimer = () => {
   emit("create-timer", {
     name: timerName.value,
     totalDuration: totalDuration.value,
-    intervals: intervals.value.map((interval) => ({
-      duration: interval.minutes * 60 + interval.seconds,
-      title: interval.title,
-      description: interval.description
-    })),
+    intervals: intervals.value,
     intervalThreshold: intervalThreshold.value,
     expireThreshold: expireThreshold.value,
     intervalColor: intervalColor.value,

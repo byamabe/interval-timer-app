@@ -29,39 +29,33 @@ const defaultTimers = [
     totalDuration: 3 * 60,
     intervals: [
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Left to Right",
         description: "Look from left to right"
       },
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Up and Down",
         description: "Look up then down with hands on chest"
       },
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Tilt ears up from side to side",
         description:
           "Tilt ears up from side to side with hands on chest. Don't bring ears down."
       },
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Neck forward and back",
         description: "Move neck forward then back with hands on chest"
       },
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Eyes level move head side to side",
         description: "Move head side to side with eyes level like Janet Jackson"
       },
       {
-        minutes: 0,
-        seconds: 30,
+        duration: 30,
         title: "Head half circles",
         description: "Tilt ear up then roll chin to chest"
       }
@@ -76,7 +70,7 @@ const defaultTimers = [
     totalDuration: 10 * 60,
     intervals: Array(20)
       .fill()
-      .map(() => ({ minutes: 0, seconds: 30, title: "", description: "" })),
+      .map(() => ({ duration: 30, title: "", description: "" })),
     intervalThreshold: 10,
     expireThreshold: 10,
     intervalColor: "#FFFF00",
@@ -88,7 +82,7 @@ const defaultTimers = [
     intervals: Array(10)
       .fill()
       .flatMap(() => [
-        { minutes: 1, seconds: 0, title: "", description: "" },
+        { duration: 60, title: "", description: "" },
         { duration: 30, title: "", description: "" }
       ]),
     intervalThreshold: 10,
@@ -106,7 +100,8 @@ const selectTimer = (timer) => {
 
 const formatDuration = (seconds) => {
   const minutes = Math.floor(seconds / 60);
-  return `${minutes} min`;
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
 const formatIntervals = (intervals) => {

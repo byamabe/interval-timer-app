@@ -84,9 +84,24 @@ const props = defineProps({
 });
 
 const isRunning = ref(false);
-const timeRemaining = ref(props.timer.totalDuration);
+const elapsedTime = ref(0);
 const currentInterval = ref(0);
-const intervalTimeRemaining = ref(props.timer.intervals[0].duration);
+
+const timeRemaining = computed(() => {
+  return Math.max(0, props.timer.totalDuration - elapsedTime.value);
+});
+
+const intervalTimeRemaining = computed(() => {
+  const currentIntervalStartTime = props.timer.intervals
+    .slice(0, currentInterval.value)
+    .reduce((sum, interval) => sum + interval.duration, 0);
+
+  return Math.max(
+    0,
+    props.timer.intervals[currentInterval.value].duration -
+      (elapsedTime.value - currentIntervalStartTime)
+  );
+});
 
 const backgroundColor = computed(() => {
   if (timeRemaining.value <= props.timer.expireThreshold) {
@@ -157,15 +172,17 @@ const toggleTimer = () => {
 };
 
 const tickTimer = async () => {
-  if (timeRemaining.value > 0) {
-    timeRemaining.value--;
-    intervalTimeRemaining.value--;
-    if (intervalTimeRemaining.value === 0) {
+  if (elapsedTime.value < props.timer.totalDuration) {
+    elapsedTime.value++;
+
+    const currentIntervalEndTime = props.timer.intervals
+      .slice(0, currentInterval.value + 1)
+      .reduce((sum, interval) => sum + interval.duration, 0);
+
+    if (elapsedTime.value >= currentIntervalEndTime) {
       if (currentInterval.value < props.timer.intervals.length - 1) {
         await playIntervalTone();
         currentInterval.value++;
-        intervalTimeRemaining.value =
-          props.timer.intervals[currentInterval.value].duration;
       } else {
         await playEndTone();
         clearInterval(intervalId);
@@ -179,46 +196,35 @@ const tickTimer = async () => {
   }
 };
 
+const resetTimer = () => {
+  clearInterval(intervalId);
+  isRunning.value = false;
+  elapsedTime.value = 0;
+  currentInterval.value = 0;
+};
+
 const nextInterval = async () => {
   if (currentInterval.value < props.timer.intervals.length - 1) {
     await playIntervalTone();
-    timeRemaining.value -= intervalTimeRemaining.value;
+    elapsedTime.value = props.timer.intervals
+      .slice(0, currentInterval.value + 1)
+      .reduce((sum, interval) => sum + interval.duration, 0);
     currentInterval.value++;
-    intervalTimeRemaining.value =
-      props.timer.intervals[currentInterval.value].duration;
   }
 };
 
 const previousInterval = () => {
   if (currentInterval.value > 0) {
     currentInterval.value--;
-    intervalTimeRemaining.value =
-      props.timer.intervals[currentInterval.value].duration;
-
-    // Recalculate the total time remaining
-    timeRemaining.value = props.timer.totalDuration - calculateElapsedTime();
+    elapsedTime.value = props.timer.intervals
+      .slice(0, currentInterval.value)
+      .reduce((sum, interval) => sum + interval.duration, 0);
   }
-};
-
-const calculateElapsedTime = () => {
-  let elapsedTime = 0;
-  for (let i = 0; i < currentInterval.value; i++) {
-    elapsedTime += props.timer.intervals[i].duration;
-  }
-  return elapsedTime;
-};
-
-const resetTimer = () => {
-  clearInterval(intervalId);
-  isRunning.value = false;
-  timeRemaining.value = props.timer.totalDuration;
-  currentInterval.value = 0;
-  intervalTimeRemaining.value = props.timer.intervals[0].duration;
 };
 
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
+  const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 

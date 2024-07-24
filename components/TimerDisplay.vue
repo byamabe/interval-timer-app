@@ -179,7 +179,7 @@ const tickTimer = async () => {
       .slice(0, currentInterval.value + 1)
       .reduce((sum, interval) => sum + interval.duration, 0);
 
-    if (elapsedTime.value >= currentIntervalEndTime) {
+    if (elapsedTime.value === currentIntervalEndTime) {
       if (currentInterval.value < props.timer.intervals.length - 1) {
         await playIntervalTone();
         currentInterval.value++;
